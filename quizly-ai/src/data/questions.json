@@ -1,0 +1,53 @@
+[
+  {
+    "category": "history",
+    "questions": [
+      {
+        "question": "Which ancient civilization built the city of Machu Picchu?",
+        "clue": "Hint: It was located in South America."
+      },
+      {
+        "question": "Who was the first person to reach the South Pole?",
+        "clue": "Hint: He was a Norwegian explorer."
+      },
+      {
+        "question": "Which ancient civilization created the first known system of writing called cuneiform?",
+        "clue": "Hint: It originated in Mesopotamia."
+      }
+    ]
+  },
+  {
+    "category": "geography",
+    "questions": [
+      {
+        "question": "Which country has the most time zones?",
+        "clue": "Hint: It is the largest country in the world by land area."
+      },
+      {
+        "question": "Which two countries share the longest land border?",
+        "clue": "Hint: They are located in North America."
+      },
+      {
+        "question": "What is the capital city of Australia?",
+        "clue": "Hint: It is located on the southeast coast of the country."
+      }
+    ]
+  },
+  {
+    "category": "science",
+    "questions": [
+      {
+        "question": "What is the largest organ in the human body?",
+        "clue": "Hint: It covers the entire external surface of the body."
+      },
+      {
+        "question": "What is the boiling point of water in Fahrenheit?",
+        "clue": "Hint: It is higher than the boiling point in Celsius."
+      },
+      {
+        "question": "What is the scientific term for the fear of heights?",
+        "clue": "Hint: It is a common phobia."
+      }
+    ]
+  }
+]
