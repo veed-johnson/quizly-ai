@@ -17,6 +17,7 @@ app.use(
   })
 );
 
+app.use(express.json());
 app.use(compression());
 app.use(cookieParser());
 app.use(bodyParser.json());
