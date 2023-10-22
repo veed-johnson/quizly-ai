@@ -3,7 +3,7 @@ import express from "express";
 
 const addSubscriber = async (req: express.Request, res: express.Response) => {
   try {
-    const { countryCode, phoneNumber } = req.body; // Assuming you send countryCode and phoneNumber in the request body
+    const { countryCode, phoneNumber } = req.body;
 
     // Check if the subscriber already exists
     const existingSubscriber = await SubscribersModel.findOne({
