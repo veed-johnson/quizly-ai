@@ -9,6 +9,8 @@ server/node_modules
 quizly-ai/.env*
 server/.env*
 
+server/build
+
 # dependencies
 /node_modules
 /.pnp
