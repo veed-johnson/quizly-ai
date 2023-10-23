@@ -179,7 +179,7 @@ function GameStats({ onPlayAgain }: { onPlayAgain: () => void }) {
         <span>
           <Image
             src={"/arrow-right.svg"}
-            alt="share to media"
+            alt="play again"
             width={20}
             height={20}
             className="ml-2 transition-transform transform translate-x-0 group-hover:translate-x-2"

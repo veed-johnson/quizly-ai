@@ -4,7 +4,7 @@ import { Poppins } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import Modal from "@/components/Modal/Modal";
 
-const poppins = Poppins({
+const inter = Poppins({
   weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
 });
@@ -53,7 +53,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head></head>
-      <body className={"h-screen overflow-y-auto " + poppins.className}>
+      <body className={"h-screen overflow-y-auto" + inter.className}>
         {children}
         <Modal />
         <Toaster />

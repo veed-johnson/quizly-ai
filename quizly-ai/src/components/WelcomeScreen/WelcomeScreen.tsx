@@ -11,6 +11,7 @@ import { formatInTimeZone } from "date-fns-tz";
 export const WelcomeScreen = function WelcomeScreen() {
   const [localTime, setLocalTime] = useState("");
 
+  console.log(new Date().getTimezoneOffset());
   const currentDate = useMemo(() => {
     const dateFormat = "d MMMM, yyyy";
 
