@@ -8,7 +8,6 @@ import "dotenv/config";
 
 import router from "./router";
 import mongoose from "mongoose";
-import { DUMMY_QUESTIONS, generateQuestionsString } from "./dump";
 
 const app = express();
 
@@ -29,8 +28,6 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 
 app.use("/", router());
-
-console.log(generateQuestionsString(DUMMY_QUESTIONS));
 
 const server = http.createServer(app);
 
