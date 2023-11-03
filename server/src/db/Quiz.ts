@@ -8,7 +8,6 @@ interface IQuestionSchema {
 }
 
 interface ICategorySchema {
-  // _id: mongoose.Types.ObjectId;
   _id?: string;
   category: string;
   questions: IQuestionSchema[];
@@ -22,7 +21,6 @@ export interface IQuizSchema {
   questionsList: ICategorySchema[];
 }
 
-//Quiz Config
 const questionSchema = new mongoose.Schema({
   question: {
     type: String,
@@ -73,6 +71,7 @@ export const getAllQuizWithPagination = (
   skip: number,
   pageSize: number
 ) => QuizModel.find(filter).skip(skip).limit(pageSize).exec();
+
 export const getLiveQuiz = () => QuizModel.findOne({ status: "live" });
 
 export const addMultipleQuiz = (dataToSave: IQuizSchema[]) =>

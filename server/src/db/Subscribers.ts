@@ -16,8 +16,11 @@ export const SubscribersModel = mongoose.model<IUser>(
   SubscribersSchema
 );
 
-// User Actions
+// Actions
 export const getSubscribers = () => SubscribersModel.find();
+
+export const getSubscribersWithPagination = (skip: number, pageSize: number) =>
+  SubscribersModel.find().skip(skip).limit(pageSize).exec();
 
 export const getSubscriberByID = (id: string) => SubscribersModel.findById(id);
 

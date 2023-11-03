@@ -28,12 +28,20 @@ export const deleteUser = async (
   try {
     const { id } = req.params;
 
+    const existingUser = await getUserById(id);
+
+    if (!existingUser) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
     const deletedUser = await deleteUserById(id);
 
     return res.json(deletedUser);
   } catch (error) {
     console.log(error);
-    return res.sendStatus(400);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -46,7 +54,9 @@ export const updateUser = async (
     const { email } = req.body;
 
     if (!email) {
-      return res.sendStatus(400);
+      return res.status(400).json({
+        message: "Email is required",
+      });
     }
 
     const user = await getUserById(id);

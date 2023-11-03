@@ -10,21 +10,12 @@ export const addQuizToDB = async function (
   try {
     const updatedQuestions: IQuizSchema[] = [...DUMMY_QUESTIONS].map(
       (question, i) => {
-        // const currentDate = new Date();
-        // currentDate.setDate(currentDate.getDate() + i);
-        // currentDate.setHours(0, 0, 0, 0);
-        const currentDate = DateTime.fromObject(
-          {
-            year: new Date().getUTCFullYear(),
-            month: new Date().getUTCMonth() + 1,
-            day: new Date().getUTCDate() + i,
-            hour: 0,
-            minute: 0,
-            second: 0,
-            millisecond: 0,
-          },
-          { zone: "utc" }
-        );
+        let currentDate = DateTime.now()
+          .setZone("utc")
+          .set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+
+        currentDate = currentDate.plus({ days: i });
+
         return {
           ...question,
           date: currentDate.toJSDate(),
@@ -38,7 +29,7 @@ export const addQuizToDB = async function (
       .status(200)
       .json({
         success: true,
-        message: `Added successfully`,
+        message: "Added successfully",
       })
       .end();
   } catch (err) {

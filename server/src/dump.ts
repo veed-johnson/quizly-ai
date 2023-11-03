@@ -1,7 +1,10 @@
 import { IQuizSchema, addMultipleQuiz } from "./db/Quiz";
+
+export type QuizWithoutDateStatus = Omit<IQuizSchema, "date" | "status">;
+
+//expected response format from chatgpt
 const RESPONSE_FORMAT = [
   {
-    status: "upcoming",
     categories:
       "should be an array of the 3 categories that have been selected. e.g. [sports, history, music]",
     questionsList: [
@@ -38,10 +41,6 @@ const RESPONSE_FORMAT = [
     ],
   },
 ];
-
-const promptMessage = `Randomly pick 3 categories out of these 6 categories: sports, music, history, geography, movies, and science. Generate 3 very engaging trivia questions each on the picked categories. Do this for 15 sets of questions. Do not include questions you have previously generated, format the response as json array in the shape of ${JSON.stringify(
-  RESPONSE_FORMAT
-)}`;
 
 export const DUMMY_QUESTIONS = [
   {
@@ -831,8 +830,6 @@ export const DUMMY_QUESTIONS = [
     ],
   },
   {
-    date: "2023-10-22T12:34:57.652Z",
-    status: "upcoming",
     categories: ["geography", "movies", "science"],
     questionsList: [
       {
@@ -901,24 +898,248 @@ export const DUMMY_QUESTIONS = [
       },
     ],
   },
+  {
+    categories: ["sports", "music", "history"],
+    questionsList: [
+      {
+        category: "sports",
+        questions: [
+          {
+            question:
+              "Which country won the most gold medals in the 2020 Summer Olympics in Tokyo?",
+            clue: "Hosted in 2020, this Olympic Games saw a nation dominate the medal count.",
+            answer: "United States",
+          },
+          {
+            question: "Who is the all-time leading scorer in NBA history?",
+            clue: "He played for the Los Angeles Lakers and is known for his scoring prowess.",
+            answer: "Kareem Abdul-Jabbar",
+          },
+          {
+            question: "Which sport involves hitting a shuttlecock over a net?",
+            clue: "This indoor sport is popular in Asia and often played with a racquet and a shuttlecock.",
+            answer: "Badminton",
+          },
+        ],
+      },
+      {
+        category: "music",
+        questions: [
+          {
+            question:
+              "Who is known as the 'Queen of Pop' and has hits like 'Like a Prayer' and 'Vogue'?",
+            clue: "This iconic singer has been a pop music sensation for decades.",
+            answer: "Madonna",
+          },
+          {
+            question:
+              "What is the national musical instrument of India, often associated with meditation and spirituality?",
+            clue: "This stringed instrument is popular in classical Indian music.",
+            answer: "Sitar",
+          },
+          {
+            question:
+              "Which rock band released the album 'Abbey Road' in 1969?",
+            clue: "This legendary British band is known for their iconic albums and songs.",
+            answer: "The Beatles",
+          },
+        ],
+      },
+      {
+        category: "history",
+        questions: [
+          {
+            question: "Who was the first President of the United States?",
+            clue: "He is often referred to as the 'Father of His Country.'",
+            answer: "George Washington",
+          },
+          {
+            question:
+              "In what year did the Renaissance period begin in Europe?",
+            clue: "This era marked a revival of art, culture, and learning in Europe.",
+            answer: "14th century (specifically 1300s)",
+          },
+          {
+            question:
+              "Who was the leader of the Soviet Union during the Cuban Missile Crisis?",
+            clue: "This Soviet leader had a tense standoff with the United States during the Cold War.",
+            answer: "Nikita Khrushchev",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    categories: ["history", "music", "sports"],
+    questionsList: [
+      {
+        category: "history",
+        questions: [
+          {
+            question:
+              "Who was the 16th President of the United States and known for his role in abolishing slavery?",
+            clue: "He delivered the Gettysburg Address and led the nation during the Civil War.",
+            answer: "Abraham Lincoln",
+          },
+          {
+            question:
+              "In what year did the United States declare its independence from Britain?",
+            clue: "This year marks the birth of the United States as an independent nation.",
+            answer: "1776",
+          },
+          {
+            question:
+              "Who was the leader of the Soviet Union during the Cuban Missile Crisis?",
+            clue: "This Soviet leader had a tense standoff with the United States during the Cold War.",
+            answer: "Nikita Khrushchev",
+          },
+        ],
+      },
+      {
+        category: "music",
+        questions: [
+          {
+            question:
+              "Who is known for the hit song 'Like a Rolling Stone' and was a key figure in the folk rock movement?",
+            clue: "This singer-songwriter's lyrics are known for their poetic depth.",
+            answer: "Bob Dylan",
+          },
+          {
+            question:
+              "What British rock band is known for their hit song 'Bohemian Rhapsody'?",
+            clue: "This iconic band was fronted by Freddie Mercury.",
+            answer: "Queen",
+          },
+          {
+            question: "What is the national musical instrument of Japan?",
+            clue: "This traditional instrument is often used in Japanese classical music.",
+            answer: "Koto",
+          },
+        ],
+      },
+      {
+        category: "sports",
+        questions: [
+          {
+            question:
+              "Who is known for breaking the 'Four-Minute Mile' barrier in track and field?",
+            clue: "This athlete's accomplishment was a historic milestone in sports.",
+            answer: "Roger Bannister",
+          },
+          {
+            question: "In which sport would you use a shuttlecock?",
+            clue: "This indoor sport is often played with a racquet and a shuttlecock.",
+            answer: "Badminton",
+          },
+          {
+            question:
+              "What is the diameter of a standard basketball hoop in inches?",
+            clue: "Scoring in basketball involves getting the ball through this round target.",
+            answer: "18 inches",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    categories: ["movies", "geography", "science"],
+    questionsList: [
+      {
+        category: "movies",
+        questions: [
+          {
+            question:
+              "Who played the character of Katniss Everdeen in 'The Hunger Games' film series?",
+            clue: "She portrayed the strong and resourceful heroine in the dystopian films.",
+            answer: "Jennifer Lawrence",
+          },
+          {
+            question:
+              "In 'Star Wars,' what is the name of Han Solo's Wookiee co-pilot and loyal friend?",
+            clue: "This character is known for his loyalty and distinctive vocalizations.",
+            answer: "Chewbacca",
+          },
+          {
+            question:
+              "Which film tells the story of a young lion named Simba and his journey to become king?",
+            clue: "This animated classic is set in the African savanna.",
+            answer: "The Lion King",
+          },
+        ],
+      },
+      {
+        category: "geography",
+        questions: [
+          {
+            question: "What is the largest country by land area in the world?",
+            clue: "This vast nation spans across Europe and Asia.",
+            answer: "Russia",
+          },
+          {
+            question:
+              "What African river is known for its annual flooding and fertile soil deposits?",
+            clue: "This river's floods have historically supported agriculture in the region.",
+            answer: "Nile River",
+          },
+          {
+            question:
+              "Which Asian river is known as the 'Yellow River' due to the color of its sediment?",
+            clue: "This river plays a crucial role in Chinese history and culture.",
+            answer: "Huang He",
+          },
+        ],
+      },
+      {
+        category: "science",
+        questions: [
+          {
+            question:
+              "What is the chemical symbol for silver on the periodic table?",
+            clue: "This shiny metal is often used for coins, jewelry, and tableware.",
+            answer: "Ag",
+          },
+          {
+            question:
+              "What is the Earth's outermost layer, consisting of solid rock?",
+            clue: "It's the layer we live on and where most geological processes occur.",
+            answer: "Lithosphere",
+          },
+          {
+            question:
+              "Who is known for formulating the theory of general relativity?",
+            clue: "This physicist's groundbreaking theory changed our understanding of gravity.",
+            answer: "Albert Einstein",
+          },
+        ],
+      },
+    ],
+  },
 ];
 
-const AddDateToQuestions = async function () {
-  const updatedQuestions: IQuizSchema[] = [...DUMMY_QUESTIONS].map(
-    (question, i) => {
-      const currentDate = new Date();
-      currentDate.setDate(currentDate.getDate() + i);
-      return {
-        ...question,
-        date: new Date(currentDate),
-        status: "upcoming",
-      };
-    }
-  );
+export const generateQuestionsString = function (
+  data: QuizWithoutDateStatus[]
+): string {
+  const allQuestions: string[] = [];
 
-  try {
-    await addMultipleQuiz(updatedQuestions);
-  } catch (err) {
-    console.log(err);
-  }
+  data.forEach((item) => {
+    item.categories.forEach((category) => {
+      const questions = item.questionsList.find((q) => q.category === category);
+
+      if (questions) {
+        questions.questions.forEach((question) => {
+          allQuestions.push(question.question);
+        });
+      }
+    });
+  });
+
+  return allQuestions.join("\n");
 };
+
+const questionsToExclude = generateQuestionsString(DUMMY_QUESTIONS);
+
+//sample prompt message
+const promptMessage = `Randomly pick 3 categories out of these 6 categories: sports, music, history, geography, movies, and science. Generate 3 very engaging trivia questions each on the picked categories. Do this for 3 sets of questions. Do not include questions related to these questions here "${questionsToExclude}", Format the response as json array in the shape of ${JSON.stringify(
+  RESPONSE_FORMAT
+)}.
+This means your JSON array will contain the 3 sets of questions`;

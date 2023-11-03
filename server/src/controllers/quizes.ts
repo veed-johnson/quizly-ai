@@ -1,4 +1,5 @@
 import {
+  IQuizSchema,
   QuizModel,
   deleteQuizzes,
   getAllQuiz,
@@ -7,6 +8,11 @@ import {
 import express from "express";
 
 import { DateTime } from "luxon";
+
+const sortCriteria = {
+  date: (a: IQuizSchema, b: IQuizSchema): number =>
+    new Date(a.date).getTime() - new Date(b.date).getTime(),
+};
 
 export const getAllQuizes = async function (
   req: express.Request,
@@ -22,7 +28,9 @@ export const getAllQuizes = async function (
     const skip = (page - 1) * pageSize;
 
     const [quizzes, totalItems] = await Promise.all([
-      getAllQuizWithPagination(query, skip, pageSize),
+      (
+        await getAllQuizWithPagination(query, skip, pageSize)
+      ).sort(sortCriteria.date),
       QuizModel.countDocuments(query),
     ]);
 
@@ -70,14 +78,22 @@ export const updateQuizStatusToLive = async function (
 ) {
   try {
     // Get the current UTC date
-    const currentUTCDate = DateTime.utc().startOf("day");
+    const currentUTCDate = DateTime.utc();
+    // console.log("UTC", currentUTCDate.startOf("day").toJSDate());
+    const newCurrentDate = currentUTCDate.startOf("day").toJSDate();
 
-    // Convert the UTC date to Sydney time zone
-    const currentSydneyDate = currentUTCDate.setZone("Australia/Sydney");
-    console.log(currentSydneyDate);
+    // // Convert the UTC date to Sydney time zone
+    // const currentSydneyDate = currentUTCDate.setZone("Australia/Sydney");
+
+    // console.log("SYDNEY", currentSydneyDate);
+
+    // const currentSydneyDate2 = DateTime.now()
+    //   .setZone("Australia/Sydney")
+    //   .startOf("day");
+    // console.log("SYDNEY II", currentSydneyDate2.toJSDate());
 
     // Find and update the quiz with a matching Sydney date and "upcoming" status
-    const updatedQuiz = await updateQuizStatus(currentSydneyDate);
+    const updatedQuiz = await updateQuizStatus(newCurrentDate);
 
     return res.status(200).json(updatedQuiz).end();
   } catch (err) {
@@ -112,7 +128,7 @@ export const deleteQuizzesByStatus = async (
   }
 };
 
-//Abstract functions
+// Abstracting the functions
 export const updateQuestionInCategory = async (
   quizId: string,
   categoryId: string,
@@ -124,47 +140,44 @@ export const updateQuestionInCategory = async (
   }
 ) => {
   try {
-    // Find the quiz based on the category ID
     const quiz = await QuizModel.findOne({ _id: quizId });
 
     if (!quiz) {
       throw new Error("Quiz not found");
     }
 
-    // Find the category within the quiz
     const category = quiz.questionsList.find((cat) => cat._id == categoryId);
 
     if (!category) {
       throw new Error("Category not found");
     }
 
-    // Find the question within the category
     const question = category.questions.find((q) => q._id == questionId);
 
     if (!question) {
       throw new Error("Question not found");
     }
 
-    // Update the question with the provided data
     question.question = updatedData.question || question.question;
     question.clue = updatedData.clue || question.clue;
     question.answer = updatedData.answer || question.answer;
 
-    // Save the updated quiz
     const updatedQuiz = await quiz.save();
 
     return updatedQuiz;
   } catch (error) {
-    throw error; // Handle or log the error as needed
+    throw error;
   }
 };
 
-export const updateQuizStatus = async (currentSydneyDate: DateTime) => {
+export const updateQuizStatus = async (currentSydneyDate: Date) => {
   try {
     // Find a quiz with the "live" status
     const liveQuiz = await QuizModel.findOne({
-      status: "live",
+      status: "upcoming",
     });
+
+    console.log(liveQuiz);
 
     // If a live quiz is found, change its status to "past"
     if (liveQuiz) {
@@ -172,13 +185,14 @@ export const updateQuizStatus = async (currentSydneyDate: DateTime) => {
       await liveQuiz.save();
     }
 
+    console.log(currentSydneyDate);
+
+    // console.log("JS DATE", currentSydneyDate.toJSDate());
     // Find a quiz with the matching Sydney date and "upcoming" status
     const quizToUpdate = await QuizModel.findOne({
-      date: currentSydneyDate.toJSDate(),
+      date: currentSydneyDate,
       status: "upcoming",
     });
-
-    console.log("UPDATEE", quizToUpdate);
 
     if (quizToUpdate) {
       quizToUpdate.status = "live";
