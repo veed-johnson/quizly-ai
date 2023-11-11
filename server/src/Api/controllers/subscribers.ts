@@ -2,13 +2,13 @@ import twilio from "twilio";
 
 const twilioClient = twilio(
   process.env.TWILIO_SID,
-  process.env.TWILIO_AUTH_TOKEN
+  process.env.TWILIO_AUTH_TOKEN 
 );
 import {
   SubscribersModel,
   getSubscriberByID,
   getSubscribersWithPagination,
-} from "../db/Subscribers";
+} from "../../db/Subscribers";
 import express from "express";
 
 const WELCOME_SMS =

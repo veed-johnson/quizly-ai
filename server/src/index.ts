@@ -8,6 +8,8 @@ import "dotenv/config";
 
 import router from "./router";
 import mongoose from "mongoose";
+import { ErrorMiddleware } from "./Api/Middlewares/ErrorMiddleware";
+import { QuizRoute } from "./Api/Routes/QuizRoute";
 
 const app = express();
 
@@ -27,7 +29,12 @@ app.use(compression());
 app.use(cookieParser());
 app.use(bodyParser.json());
 
+console.log({ErrorMiddleware})
+app.use(ErrorMiddleware);
+
 app.use("/", router());
+// routes
+app.use("/quiz", QuizRoute);
 
 const server = http.createServer(app);
 
@@ -40,4 +47,6 @@ server.listen(port, () => {
 mongoose.set("strictQuery", false);
 mongoose.Promise = Promise;
 mongoose.connect(process.env.MONGO_URL);
-mongoose.connection.on("error", (error: Error) => console.log(error));
+console.log({url: process.env.MONGO_URL})
+mongoose.connection.on("error", (error: Error) => console.log({error}));
+

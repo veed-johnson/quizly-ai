@@ -5,7 +5,7 @@ import {
   getUsers,
   getUserById,
   getUserByEmail,
-} from "../db/Users";
+} from "../../db/Users";
 
 export const getAllUsers = async (
   req: express.Request,

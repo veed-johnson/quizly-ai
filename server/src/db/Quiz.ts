@@ -61,24 +61,24 @@ const QuizSchema = new mongoose.Schema({
   questionsList: [categorySchema],
 });
 
-export const QuizModel = mongoose.model<IQuizSchema>("Quiz", QuizSchema);
+export const QuizModelTest = mongoose.model<IQuizSchema>("Quiz", QuizSchema);
 
 //Quiz actions
-export const getAllQuiz = () => QuizModel.find();
+export const getAllQuiz = () => QuizModelTest.find();
 
 export const getAllQuizWithPagination = (
   filter: object,
   skip: number,
   pageSize: number
-) => QuizModel.find(filter).skip(skip).limit(pageSize).exec();
+) => QuizModelTest.find(filter).skip(skip).limit(pageSize).exec();
 
-export const getLiveQuiz = () => QuizModel.findOne({ status: "live" });
+export const getLiveQuiz = () => QuizModelTest.findOne({ status: "live" });
 
 export const addMultipleQuiz = (dataToSave: IQuizSchema[]) =>
-  QuizModel.insertMany(dataToSave);
+  QuizModelTest.insertMany(dataToSave);
 
 export const updateQuizById = (id: string, values: Record<string, any>) =>
-  QuizModel.findByIdAndUpdate(id, values);
+  QuizModelTest.findByIdAndUpdate(id, values);
 
 export const deleteQuizzes = (filter: Record<string, any>) =>
-  QuizModel.deleteMany(filter);
+  QuizModelTest.deleteMany(filter);

@@ -6,7 +6,6 @@ import quiz from "./quiz";
 import subscribers from "./subscribers";
 
 const router = express.Router();
-
 export default (): express.Router => {
   authentication(router);
   users(router);

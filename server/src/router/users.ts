@@ -5,7 +5,7 @@ import {
   deleteUser,
   updateUser,
   createAdmin,
-} from "../controllers/users";
+} from "../Api/controllers/users";
 import { isAdmin, isAuthenticated } from "../middlewares";
 
 export default (router: express.Router) => {

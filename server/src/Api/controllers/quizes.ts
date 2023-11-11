@@ -1,10 +1,10 @@
 import {
   IQuizSchema,
-  QuizModel,
+  QuizModelTest,
   deleteQuizzes,
   getAllQuiz,
   getAllQuizWithPagination,
-} from "../db/Quiz";
+} from "../../db/Quiz";
 import express from "express";
 
 import { DateTime } from "luxon";
@@ -31,7 +31,7 @@ export const getAllQuizes = async function (
       (
         await getAllQuizWithPagination(query, skip, pageSize)
       ).sort(sortCriteria.date),
-      QuizModel.countDocuments(query),
+      QuizModelTest.countDocuments(query),
     ]);
 
     const totalPages = Math.ceil(Number(totalItems) / Number(pageSize));
@@ -140,7 +140,7 @@ export const updateQuestionInCategory = async (
   }
 ) => {
   try {
-    const quiz = await QuizModel.findOne({ _id: quizId });
+    const quiz = await QuizModelTest.findOne({ _id: quizId });
 
     if (!quiz) {
       throw new Error("Quiz not found");
@@ -173,7 +173,7 @@ export const updateQuestionInCategory = async (
 export const updateQuizStatus = async (currentSydneyDate: Date) => {
   try {
     // Find a quiz with the "live" status
-    const liveQuiz = await QuizModel.findOne({
+    const liveQuiz = await QuizModelTest.findOne({
       status: "upcoming",
     });
 
@@ -189,7 +189,7 @@ export const updateQuizStatus = async (currentSydneyDate: Date) => {
 
     // console.log("JS DATE", currentSydneyDate.toJSDate());
     // Find a quiz with the matching Sydney date and "upcoming" status
-    const quizToUpdate = await QuizModel.findOne({
+    const quizToUpdate = await QuizModelTest.findOne({
       date: currentSydneyDate,
       status: "upcoming",
     });

@@ -5,8 +5,8 @@ import {
   deleteSubscriber,
   getSubscribers,
   welcomeSubscriber,
-} from "../controllers/subscribers";
-import { sendWelcomeSMS } from "../services/sms";
+} from "../Api/controllers/subscribers";
+// import { sendWelcomeSMS } from "../services/sms";
 
 export default (router: express.Router) => {
   router.post("/subscribe", addSubscriber);

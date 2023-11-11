@@ -5,7 +5,7 @@ import {
   editSingleQuizQuestion,
   getAllQuizes,
   updateQuizStatusToLive,
-} from "../controllers/quizes";
+} from "../Api/controllers/quizes";
 
 export default (router: express.Router) => {
   router.get("/quiz/all", getAllQuizes);
