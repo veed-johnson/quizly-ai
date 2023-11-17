@@ -5,7 +5,7 @@ const twilioClient = twilio(
   process.env.TWILIO_AUTH_TOKEN 
 );
 import {
-  SubscribersModel,
+  MySubscribersModel,
   getSubscriberByID,
   getSubscribersWithPagination,
 } from "../../db/Subscribers";
@@ -26,7 +26,7 @@ const getSubscribers = async function (
 
     const [subscribers, totalItems] = await Promise.all([
       await getSubscribersWithPagination(skip, pageSize),
-      SubscribersModel.countDocuments(),
+      MySubscribersModel.countDocuments(),
     ]);
 
     const totalPages = Math.ceil(Number(totalItems) / Number(pageSize));
@@ -48,7 +48,7 @@ const addSubscriber = async (req: express.Request, res: express.Response) => {
   try {
     const { countryCode, phoneNumber } = req.body;
 
-    const existingSubscriber = await SubscribersModel.findOne({
+    const existingSubscriber = await MySubscribersModel.findOne({
       countryCode,
       phoneNumber,
     });
@@ -57,7 +57,7 @@ const addSubscriber = async (req: express.Request, res: express.Response) => {
       return res.status(400).json({ error: "Subscriber already exists" });
     }
 
-    const newSubscriber = new SubscribersModel({
+    const newSubscriber = new MySubscribersModel({
       countryCode,
       phoneNumber,
     });
@@ -85,7 +85,7 @@ const deleteSubscriber = async (
       return res.status(404).json({ error: "Subscriber not found" });
     }
 
-    await SubscribersModel.deleteOne({ _id: subscriberId });
+    await MySubscribersModel.deleteOne({ _id: subscriberId });
 
     res.status(204).send();
   } catch (error) {
@@ -99,7 +99,7 @@ const welcomeSubscriber = async function (
   res: express.Response
 ) {
   const phoneNumber = req.params.number;
-
+  
   twilioClient.messages
     .create({
       to: `+${phoneNumber}`,

@@ -4,5 +4,5 @@ import { QuestionSchema } from './QuestionSchema';
 
 export const QuizCategorySchema = new Schema<QuizCategory>({
     category: {type: String, required: true},
-    questionsList: {type: [QuestionSchema], required: true}
+    questions: {type: [QuestionSchema], required: true}
 })

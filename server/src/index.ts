@@ -10,7 +10,8 @@ import router from "./router";
 import mongoose from "mongoose";
 import { ErrorMiddleware } from "./Api/Middlewares/ErrorMiddleware";
 import { QuizRoute } from "./Api/Routes/QuizRoute";
-
+import { generateQuizScheduler } from "./Api/Schedulers/AddQuizScheduler";
+import { sendMessageToUsersScheduler } from "./Api/Schedulers/SendMessageToUsersScheduler";
 const app = express();
 
 app.use(
@@ -36,6 +37,11 @@ app.use("/", router());
 // routes
 app.use("/quiz", QuizRoute);
 
+
+// Schedulers
+generateQuizScheduler.addNewQuizzes(); // Handles creating quizzes
+// sendMessageToUsersScheduler.execute();
+
 const server = http.createServer(app);
 
 const port = process.env.PORT || 8080;
@@ -47,6 +53,5 @@ server.listen(port, () => {
 mongoose.set("strictQuery", false);
 mongoose.Promise = Promise;
 mongoose.connect(process.env.MONGO_URL);
-console.log({url: process.env.MONGO_URL})
 mongoose.connection.on("error", (error: Error) => console.log({error}));
 
