@@ -44,7 +44,7 @@ export class QuizFeatures implements IQuizFeatures {
         return quizzes;
         }
     
-    GetAllQuizzes = async (page: number, pageSize: number, sort: {[key in keyof Partial<Quiz>]: number} = {date: -1}) : Promise<PaginationResponse<Quiz>> => {
+    GetAllQuizzes = async (page: number, pageSize: number, sort: {[key in keyof Partial<Quiz>]: number} = {date: 1}) : Promise<PaginationResponse<Quiz>> => {
         const referenceDateStatusIsBasedOn = DateAndTimeUtilities.GetCurrentDate();
         const quizzes: PaginationResponse<Quiz> = await this._quizService.GetAllQuizzes(page, pageSize, sort);
         quizzes.items = quizzes.items.map(quiz => {

@@ -41,7 +41,8 @@ export class PromptUtilities{
           ]
     }
     public static GenerateGetQuizQuestionsPrompt(totalNoOfQuestions: number, categories: string, RESPONSE_FORMAT: string, questionsToExclude: string): string{
-        const promptMessage = `Randomly pick 3 categories out of these 6 categories: ${categories}. Generate ${totalNoOfQuestions} very engaging trivia questions each on the picked categories. Do this for ${totalNoOfQuestions} sets of questions. Do not include questions related to these questions here "${questionsToExclude}", Format the response as json array in the shape of ${JSON.stringify(
+        const NoOfQuestionsPerCategory = 3;
+        const promptMessage = `Randomly pick 3 categories out of these 6 categories: ${categories}. Generate ${NoOfQuestionsPerCategory} very engaging trivia questions each on the picked categories. Do this for ${totalNoOfQuestions} sets of questions. Do not include questions related to these questions here "${questionsToExclude}", Format the response as json array in the shape of ${JSON.stringify(
             RESPONSE_FORMAT
           )}.
           This means your JSON array will contain the ${totalNoOfQuestions} sets of questions`;
