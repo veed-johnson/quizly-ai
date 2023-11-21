@@ -15,4 +15,6 @@ export interface IQuizFeatures {
     UpdateQuizStatusToLive(id: string): Promise<Quiz>;
 
     DeleteQuizByStatusRequest(deleteQuizByStatusRequest: DeleteQuizByStatusRequest): Promise<number> 
+
+    AddQuizQuestions(questions: Partial<Quiz>[] ): Promise<Quiz[]>
 }

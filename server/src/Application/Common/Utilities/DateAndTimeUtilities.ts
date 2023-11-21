@@ -2,13 +2,22 @@ import { TimeUnit } from "../ApplicationEnums/TimeUnit";
 import { TimeConstants } from "../Constants/TimeConstants";
 
 export class DateAndTimeUtilities {
+    /**
+     * 
+     * @returns current time based on Australia/Sydney time
+     */
     public static GetCurrentTime = (): Date => {
-        return new Date(new Date().toUTCString())
+        // Get the current time in Sydney timezone
+        const sydneyTimeString = new Date().toLocaleString('en-US', { timeZone: 'Australia/Sydney' });
+
+        // Create a Date object from the formatted string
+        return new Date(sydneyTimeString);
     }
     public static AddDays(date: Date, days: number): Date{
         var result = new Date(date);
         result.setDate(result.getDate() + days);
-        return result;
+        result.toLocaleString('en-US', { timeZone: 'Australia/Sydney' });
+        return new Date(result);
     }
 
     public static AreDatesOnSameDay = (date1: Date, date2: Date): boolean => {

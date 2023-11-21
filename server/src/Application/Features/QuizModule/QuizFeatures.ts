@@ -24,10 +24,14 @@ export class QuizFeatures implements IQuizFeatures {
         let totalQuizItemsLeftToAdd = quiz_size;
         while(totalQuizItemsLeftToAdd > 0){
             const batchSizeOfQuizToAdd = this.calculateBatchSize(totalQuizItemsLeftToAdd);
-            console.log({totalQuizItemsLeftToAdd, batchSizeOfQuizToAdd})
+            console.log({totalQuizItemsLeftToAdd, batchSizeOfQuizToAdd});
+
+            const DELAY = 60 * 1000; // tim
             if(batchSizeOfQuizToAdd > 0){
-                const createdQuizzes = await this.addNewQuizzes(batchSizeOfQuizToAdd, categories);
-                quizzesAdded.push(...createdQuizzes);
+                setTimeout(async () => {
+                    const createdQuizzes = await this.addNewQuizzes(batchSizeOfQuizToAdd, categories);
+                    quizzesAdded.push(...createdQuizzes);
+                }, DELAY)
             }
             totalQuizItemsLeftToAdd -= batchSizeOfQuizToAdd;
         }
@@ -41,6 +45,9 @@ export class QuizFeatures implements IQuizFeatures {
         quizzes.items = quizzes.items.map(quiz => {
             return this._quizService.AddQuizStatusToQuizBasedOnReferenceDate(quiz, referenceDateStatusIsBasedOn)
         })
+        quizzes.items.sort((quizA, quizB) => {
+            return quizA.status.localeCompare(quizB.status);
+          });
         return quizzes;
         }
     
@@ -50,6 +57,9 @@ export class QuizFeatures implements IQuizFeatures {
         quizzes.items = quizzes.items.map(quiz => {
             return this._quizService.AddQuizStatusToQuizBasedOnReferenceDate(quiz, referenceDateStatusIsBasedOn)
         })
+        quizzes.items.sort((quizA, quizB) => {
+            return quizA.status.localeCompare(quizB.status);
+          });
         return quizzes;
     }
 
@@ -109,6 +119,13 @@ export class QuizFeatures implements IQuizFeatures {
         return await this._quizService.DeleteQuizByStatus(deleteQuizByStatusRequest);
     }
 
+    AddQuizQuestions = async(questions: Partial<Quiz>[] ): Promise<Quiz[]> => {
+        const lastAddedQuizDate: Date = await this._quizService.GetLatestScheduledQuizDate();
+        const newQuizStartDate: Date = DateAndTimeUtilities.AddDays(lastAddedQuizDate, 1);
+        const quizEntities = this._quizService.TransformQuizQuestionsToQuizEntities(questions, newQuizStartDate);
+        
+        return await this._quizService.InsertManyQuizAsync(quizEntities);
+    }
     private addNewQuizzes = async (quiz_size: number, categories: string): Promise<Quiz[]> => {
         
         const lastAddedQuizDate: Date = await this._quizService.GetLatestScheduledQuizDate();

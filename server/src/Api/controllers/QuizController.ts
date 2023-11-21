@@ -6,6 +6,7 @@ import { PaginatedQueryParamsRequest } from "../../Application/DTO/Models/Pagina
 import { EditSingleQuizQuestionRequest } from "../../Application/DTO/Requests/QuizRequests/EditSingleQuizQuestionRequest";
 import { QuizIdParam } from "../../Application/DTO/Requests/QuizRequests/QuizIdParam";
 import { DeleteQuizByStatusRequest } from "../../Application/DTO/Requests/QuizRequests/DeleteQuizByStatusRequest";
+import { QuizQuestionsRequest } from "../../Application/DTO/Requests/QuizRequests/QuizQuestionsRequest";
 
 
 export class QuizController {
@@ -25,6 +26,12 @@ export class QuizController {
         catch(ex){
             next(ex)
         }
+    }
+
+    public AddQuizQuestions = async (request: Request<{}, {}, QuizQuestionsRequest>, response: Response, next: NextFunction) => {
+        let questions = request.body.questions;
+        const addedQuestions = await this._quizFeatures.AddQuizQuestions(questions);
+        return response.status(200).json(addedQuestions);
     }
 
     public GetCurrentQuiz  = async (request: Request, response: Response, next: NextFunction) => {
