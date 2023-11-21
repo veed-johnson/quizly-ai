@@ -66,8 +66,8 @@ export class QuizService implements IQuizService{
     public GetPastQuizzes = async (page: number, pageSize: number, date?: Date): Promise<PaginationResponse<Quiz>> => {
         const startDate = date ?? DateAndTimeUtilities.GetCurrentDate();
         const pastQuizzesQuery = this.GetPastQuizQuery(startDate);
-
-        return await this._quizRepository.ToPagedAsync(pastQuizzesQuery, page, pageSize);
+        const sort = {date: 1};
+        return await this._quizRepository.ToPagedAsync(pastQuizzesQuery, page, pageSize, sort);
     }
 
     public GetCurrentQuizzes = async (page: number, pageSize: number, date?: Date ): Promise<PaginationResponse<Quiz>> => {
@@ -75,10 +75,11 @@ export class QuizService implements IQuizService{
         const startDate = date ?? DateAndTimeUtilities.GetCurrentDate();
 
         let query =this.GetCurrentQuizQuery(startDate);
-        return await this._quizRepository.ToPagedAsync(query, page, pageSize);
+        const sort = {date: 1};
+        return await this._quizRepository.ToPagedAsync(query, page, pageSize, sort);
     }
 
-    public GetAllQuizzes = async (page: number, pageSize: number, sort: {[key in keyof Partial<Quiz>]: number} = {_id: -1} ): Promise<PaginationResponse<Quiz>> => {
+    public GetAllQuizzes = async (page: number, pageSize: number, sort: {[key in keyof Partial<Quiz>]: number} = {date: 1} ): Promise<PaginationResponse<Quiz>> => {
         // get today's date
 
         let query ={
@@ -90,8 +91,8 @@ export class QuizService implements IQuizService{
     public GetUpcomingQuizzes = async (page: number, pageSize: number, date?: Date): Promise<PaginationResponse<Quiz>> => {
         const startDate = date ?? DateAndTimeUtilities.GetCurrentDate();
         const pastQuizzesQuery = this.GetUpcomingQuizQuery(startDate);
-
-        return await this._quizRepository.ToPagedAsync(pastQuizzesQuery, page, pageSize);
+        const sort = {date: 1};
+        return await this._quizRepository.ToPagedAsync(pastQuizzesQuery, page, pageSize, sort);
     }
 
     public UpdateQuizStatusToLive = async (quiz: Quiz): Promise<Quiz> => {
