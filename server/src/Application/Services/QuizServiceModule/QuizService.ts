@@ -249,11 +249,11 @@ export class QuizService implements IQuizService{
         if(quizDate < referenceDate){
             return QuizStatus.past;
         }
-        else if(quizDate ==  referenceDate){
+        else if(DateAndTimeUtilities.AreDatesOnSameDay(quizDate, referenceDate)){
             return QuizStatus.live;
         }
         else{
-            return QuizStatus.upcoming
+            return QuizStatus.upcoming;
         }
     }
 
