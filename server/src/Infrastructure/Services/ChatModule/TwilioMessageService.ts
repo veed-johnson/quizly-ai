@@ -34,4 +34,19 @@ export class TwilioMessageService implements IMessageService{
         return notSentPhoneNumbers.length === 0;
     }
 
+    SendSMSToSingleUserAsync = async (user: string, message: string): Promise<boolean> => {
+        try{
+            const sendMessageResponse = await this._twillio.messages.create({
+                body: message,
+                from: this._twillioPhoneNumber,
+                to: user
+            })
+            console.log({sendMessageResponse})
+            return true;
+        }
+        catch(ex){
+            return false;
+        }
+    }
+
 }

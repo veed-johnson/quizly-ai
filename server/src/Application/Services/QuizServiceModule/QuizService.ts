@@ -3,10 +3,14 @@ import { IQuizRepository } from "../../../Application/Contracts/DataAccess/QuizM
 import { IChatService } from "../../../Application/Contracts/Services/ChatModule/IChatService";
 import { IPromptService } from "../../../Application/Contracts/Services/ChatModule/IPromptService";
 import { IQuizService } from "../../../Application/Contracts/Services/QuizServiceModule/IQuizService";
-import { DateAndTimeUtilities } from "../../../Application/Utilities/DateAndTimeUtilities";
+import { DateAndTimeUtilities } from "../../Common/Utilities/DateAndTimeUtilities";
 import { Quiz } from "../../../Domain/Entities/QuizModule/Quiz";
 import { QuizStatus } from "../../../Domain/Enums/QuizModule/QuizStatus";
 import { RecordStatus } from "../../../Domain/Enums/Common/RecordStatus";
+import { ObjectId, Schema } from "mongoose";
+import { QuizNotFoundException } from "../../../Application/Common/Exceptions/QuizNotFoundException";
+import { DeleteQuizByStatusRequest } from "../../../Application/DTO/Requests/QuizRequests/DeleteQuizByStatusRequest";
+import { InvalidArgumentException } from "../../../Application/Common/Exceptions/InvalidArgumentException";
 
 
 export class QuizService implements IQuizService{
@@ -19,6 +23,7 @@ export class QuizService implements IQuizService{
         this._chatService = chatService;
         this._quizRepository = quizRepository;
     }
+    
 
     public GetCurrentQuiz = async (): Promise<Quiz | null> => {
         // get today's date
@@ -29,7 +34,8 @@ export class QuizService implements IQuizService{
             date: {
               $gte: todaysStartDate, // Greater than or equal to the start of the day
               $lt: tomorrowsStartDate, // Less than the start of the next day
-            }
+            },
+            recordStatus: RecordStatus.active
           }
           const currentQuiz =  await this._quizRepository.firstOrDefault(query);
           
@@ -59,51 +65,52 @@ export class QuizService implements IQuizService{
 
     public GetPastQuizzes = async (page: number, pageSize: number, date?: Date): Promise<PaginationResponse<Quiz>> => {
         const startDate = date ?? DateAndTimeUtilities.GetCurrentDate();
-        const pastQuizzesQuery = {
-            date: {
-                $lt: startDate,
-            },
-            recordStatus: RecordStatus.active
-        };
+        const pastQuizzesQuery = this.GetPastQuizQuery(startDate);
+
         return await this._quizRepository.ToPagedAsync(pastQuizzesQuery, page, pageSize);
     }
 
     public GetCurrentQuizzes = async (page: number, pageSize: number, date?: Date ): Promise<PaginationResponse<Quiz>> => {
         // get today's date
         const startDate = date ?? DateAndTimeUtilities.GetCurrentDate();
-        const nextDayDate = DateAndTimeUtilities.AddDays(startDate, 1);
 
-        let query ={
-            date: {
-              $gte: startDate, // Greater than or equal to the start of the day
-              $lt: nextDayDate, // Less than the start of the next day
-            },
-            recordStatus: RecordStatus.active
-          }
-          return await this._quizRepository.ToPagedAsync(query, page, pageSize);
+        let query =this.GetCurrentQuizQuery(startDate);
+        return await this._quizRepository.ToPagedAsync(query, page, pageSize);
     }
 
-    public GetAllQuizzes = async (page: number, pageSize: number, date?: Date ): Promise<PaginationResponse<Quiz>> => {
+    public GetAllQuizzes = async (page: number, pageSize: number, sort: {[key in keyof Partial<Quiz>]: number} = {_id: -1} ): Promise<PaginationResponse<Quiz>> => {
         // get today's date
 
         let query ={
             recordStatus: RecordStatus.active
         }
-        return await this._quizRepository.ToPagedAsync(query, page, pageSize);
+        return await this._quizRepository.ToPagedAsync(query, page, pageSize, sort);
     }
 
     public GetUpcomingQuizzes = async (page: number, pageSize: number, date?: Date): Promise<PaginationResponse<Quiz>> => {
         const startDate = date ?? DateAndTimeUtilities.GetCurrentDate();
-        const pastQuizzesQuery = {
-            date: {
-                $gt: startDate
-            },
-            recordStatus: RecordStatus.active
-        };
+        const pastQuizzesQuery = this.GetUpcomingQuizQuery(startDate);
+
         return await this._quizRepository.ToPagedAsync(pastQuizzesQuery, page, pageSize);
     }
 
+    public UpdateQuizStatusToLive = async (quiz: Quiz): Promise<Quiz> => {
+        if(!quiz){
+            throw new QuizNotFoundException(`quiz with not found`);
+        }
+        quiz.recordStatus = RecordStatus.active;
+        quiz.date = DateAndTimeUtilities.GetCurrentDate();
+        return await this._quizRepository.UpdateAsync(quiz)
+        
+    }
+    public UpdateQuizToLiveUsingId = async (id: ObjectId): Promise<Quiz> => {
+        const quiz: Quiz = await this._quizRepository.GetByIdAsync(id);
+        if(!quiz){
+            throw new QuizNotFoundException(`quiz with id ${id} not found`);
+        }
 
+        return await this.UpdateQuizStatusToLive(quiz);
+    }
     public GenerateQuizQuestions = async (size: number, categories: string, questionsToExcludeFromGeneratedQuestions: Partial<Quiz>[] = []): Promise<Partial<Quiz>[]> => {
 
         const quizQuestionsPrompt: string = this._promptService.GenerateGetQuizQuestionsPrompt(size, categories, questionsToExcludeFromGeneratedQuestions)
@@ -127,10 +134,12 @@ export class QuizService implements IQuizService{
         return quizQuestions;
     } 
 
+    
+
     public TransformQuizQuestionsToQuizEntities = (quizQuestions: Partial<Quiz>[], startDateForQuiz: Date): Quiz[] => {
 
         let currentDate = startDateForQuiz;
-        const quizList: Quiz[] = []
+        const quizList: Quiz[] = [];
 
         for(const quiz of quizQuestions){
             const quizEntity = this.TransformPartialQuizToEntity(quiz, currentDate);
@@ -162,6 +171,33 @@ export class QuizService implements IQuizService{
         return await this._quizRepository.insertMany(quizList);
     }
 
+    public UpdateQuiz = async (quiz: Quiz): Promise<Quiz> => {
+        return await this._quizRepository.UpdateAsync(quiz);
+    }
+
+    public GetQuizById = async (id: ObjectId): Promise<Quiz> => {
+        return await this._quizRepository.GetByIdAsync(id);
+    }
+
+    public UpdateManyQuiz = async (query: {[key in keyof Partial<Quiz>] : any}, update: Partial<Quiz>): Promise<number> => {
+        return await this._quizRepository.UpdateManyAsync(query, update);
+    }
+
+    public UpdateAllCurrentQuizToArchived = async (): Promise<number> => {
+        const startDate = DateAndTimeUtilities.GetCurrentDate();
+        const nextDayDate = DateAndTimeUtilities.AddDays(startDate, 1);
+
+        let query ={
+            date: {
+              $gte: startDate, // Greater than or equal to the start of the day
+              $lt: nextDayDate, // Less than the start of the next day
+            },
+            recordStatus: RecordStatus.active
+          }
+        
+        const update = {recordStatus : RecordStatus.archived}
+        return await this._quizRepository.UpdateManyAsync(query, update);
+    } 
 
     private TransformPartialQuizToEntity = (quiz: Partial<Quiz>, date: Date): Quiz => {
         const quizEntity = new Quiz();
@@ -181,6 +217,27 @@ export class QuizService implements IQuizService{
         quiz.status = this.GetQuizStatusBasedOnReferenceDate(quiz.date, referenceDate);
         return quiz;
     }
+    
+    DeleteQuizByStatus = async (deleteQuizByStatusRequest: DeleteQuizByStatusRequest): Promise<number> => {
+        const {status, softDelete, referenceDate } = deleteQuizByStatusRequest;
+
+        let query : { [key in keyof Partial<Quiz>]: any} = {};
+        switch(status){
+            case QuizStatus.past:
+                query = this.GetPastQuizQuery(referenceDate);
+                break;
+            case QuizStatus.live:
+                query = this.GetCurrentQuizQuery(referenceDate);
+                break;
+            case QuizStatus.upcoming:
+                query = this.GetUpcomingQuizQuery(referenceDate);
+                break;
+            default:
+                throw new InvalidArgumentException(`Invalid status : ${status}`)
+        }
+
+        return await this._quizRepository.DeleteManyAsync(query, softDelete);
+    }
 
     private GetQuizStatusBasedOnReferenceDate = (quizDate: Date, referenceDate: Date): QuizStatus => {
         if(quizDate < referenceDate){
@@ -193,15 +250,37 @@ export class QuizService implements IQuizService{
             return QuizStatus.upcoming
         }
     }
-    private GetQuizStatusBasedOnDate = (date: Date): QuizStatus => {
-        if(date < DateAndTimeUtilities.GetCurrentTime()){
-            return QuizStatus.past;
-        }
-        else if(date ==  DateAndTimeUtilities.GetCurrentTime()){
-            return QuizStatus.live;
-        }
-        else{
-            return QuizStatus.upcoming
-        }
+
+    
+
+    private GetPastQuizQuery = (startDate: Date): { [key in keyof Partial<Quiz>]: any} => {
+        return {
+            date: {
+                $lt: startDate,
+            },
+            recordStatus: RecordStatus.active
+        };
+
+    }
+
+    private GetCurrentQuizQuery = (startDate: Date): { [key in keyof Partial<Quiz>]: any} => {
+        const nextDayDate = DateAndTimeUtilities.AddDays(startDate, 1);
+
+        return {
+            date: {
+              $gte: startDate, // Greater than or equal to the start of the day
+              $lt: nextDayDate, // Less than the start of the next day
+            },
+            recordStatus: RecordStatus.active
+          }
+    }
+
+    private GetUpcomingQuizQuery = (startDate: Date): {[key in keyof Partial<Quiz>]: any} => {
+        return {
+            date: {
+                $gt: startDate
+            },
+            recordStatus: RecordStatus.active
+        };
     }
 }

@@ -3,8 +3,12 @@ import { GetCurrentQuizResponse } from "../../../Application/DTO/Responses/QuizR
 import { Quiz } from "../../../Domain/Entities/QuizModule/Quiz";
 import { IQuizFeatures } from "../../../Application/Contracts/Features/QuizModule/IQuizFeatures";
 import { IQuizService } from "../../../Application/Contracts/Services/QuizServiceModule/IQuizService";
-import { DateAndTimeUtilities } from "../../../Application/Utilities/DateAndTimeUtilities";
+import { DateAndTimeUtilities } from "../../Common/Utilities/DateAndTimeUtilities";
 import { QuestionResponse } from "../../../Application/DTO/Responses/QuizResponses/Aggregates/QuestionResponse";
+import { EditSingleQuizQuestionRequest } from "../../../Application/DTO/Requests/QuizRequests/EditSingleQuizQuestionRequest";
+import mongoose, { ObjectId, mongo } from "mongoose";
+import { QuizNotFoundException } from "../../../Application/Common/Exceptions/QuizNotFoundException";
+import { DeleteQuizByStatusRequest } from "../../../Application/DTO/Requests/QuizRequests/DeleteQuizByStatusRequest";
 
 export class QuizFeatures implements IQuizFeatures {
     private readonly _quizService: IQuizService;
@@ -38,13 +42,71 @@ export class QuizFeatures implements IQuizFeatures {
             return this._quizService.AddQuizStatusToQuizBasedOnReferenceDate(quiz, referenceDateStatusIsBasedOn)
         })
         return quizzes;
+        }
+    
+    GetAllQuizzes = async (page: number, pageSize: number, sort: {[key in keyof Partial<Quiz>]: number} = {date: -1}) : Promise<PaginationResponse<Quiz>> => {
+        const referenceDateStatusIsBasedOn = DateAndTimeUtilities.GetCurrentDate();
+        const quizzes: PaginationResponse<Quiz> = await this._quizService.GetAllQuizzes(page, pageSize, sort);
+        quizzes.items = quizzes.items.map(quiz => {
+            return this._quizService.AddQuizStatusToQuizBasedOnReferenceDate(quiz, referenceDateStatusIsBasedOn)
+        })
+        return quizzes;
     }
+
     GetCurrentQuiz = async (): Promise<GetCurrentQuizResponse[]> => {
         const currentQuiz: Quiz | null =  await this._quizService.GetCurrentQuiz();
         if(currentQuiz){
             return this.transformToQuizResponse(currentQuiz);
         }
         return [];
+    }
+
+    EditSingleQuizQuestion = async (editQuestionRequest: EditSingleQuizQuestionRequest): Promise<Quiz> => {
+        const {quizId, categoryId, questionId, question, clue, answer} = editQuestionRequest;
+        const quizObjectId: ObjectId = new mongo.ObjectId(quizId) as unknown as ObjectId;
+        const quiz = await this._quizService.GetQuizById(quizObjectId);
+        if(!quiz){
+            throw new QuizNotFoundException(`quiz with id ${quizId} not found`);
+        }
+
+        const matchingCategory = quiz.questionsList.find(questionList => questionList._id.toString() == categoryId);
+        if(!matchingCategory){
+            throw new QuizNotFoundException(`category with id ${categoryId} not found`);
+        }
+
+        const matchingQuestion = matchingCategory.questions.find(question => question._id.toString() == questionId); 
+        if(!matchingQuestion){
+            throw new QuizNotFoundException(`question with id ${questionId} not found in category ${categoryId}`);
+        }
+
+        if(question){
+            matchingQuestion.question = question;
+        }
+        if(clue){
+            matchingQuestion.clue = clue;
+        }
+        if(answer){
+            matchingQuestion.answer = answer;
+        }
+
+        return await this._quizService.UpdateQuiz(quiz);
+
+    }
+
+    UpdateQuizStatusToLive = async (id: string): Promise<Quiz> => {
+        const quizId: ObjectId = new mongo.ObjectId(id) as unknown as ObjectId;
+        const quiz = await this._quizService.GetQuizById(quizId);
+        if(!quiz){
+            throw new QuizNotFoundException(`Quiz with Id ${id} not found`);
+        }
+
+        await this._quizService.UpdateAllCurrentQuizToArchived();
+
+        return await this._quizService.UpdateQuizStatusToLive(quiz);
+    }
+
+    DeleteQuizByStatusRequest = async (deleteQuizByStatusRequest: DeleteQuizByStatusRequest): Promise<number> => {
+        return await this._quizService.DeleteQuizByStatus(deleteQuizByStatusRequest);
     }
 
     private addNewQuizzes = async (quiz_size: number, categories: string): Promise<Quiz[]> => {

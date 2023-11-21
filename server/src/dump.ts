@@ -1,6 +1,6 @@
-import { IQuizSchema, addMultipleQuiz } from "./db/Quiz";
+import { Quiz } from "./Domain/Entities/QuizModule/Quiz";
 
-export type QuizWithoutDateStatus = Omit<IQuizSchema, "date" | "status">;
+export type QuizWithoutDateStatus = Omit<Partial<Quiz>, "date" | "status">;
 
 //expected response format from chatgpt
 const RESPONSE_FORMAT = [

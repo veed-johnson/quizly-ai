@@ -1,5 +1,5 @@
 import { IPromptService } from "../../../Application/Contracts/Services/ChatModule/IPromptService";
-import { PromptUtilities } from "../../../Application/Utilities/PromptUtilities";
+import { PromptUtilities } from "../../Common/Utilities/PromptUtilities";
 
 
 export class PromptService implements IPromptService{

@@ -6,12 +6,14 @@ import compression from "compression";
 import cors from "cors";
 import "dotenv/config";
 
-import router from "./router";
 import mongoose from "mongoose";
 import { ErrorMiddleware } from "./Api/Middlewares/ErrorMiddleware";
 import { QuizRoute } from "./Api/Routes/QuizRoute";
 import { generateQuizScheduler } from "./Api/Schedulers/AddQuizScheduler";
 import { sendMessageToUsersScheduler } from "./Api/Schedulers/SendMessageToUsersScheduler";
+import { AuthenticationRoute } from "./Api/Routes/AuthenticationRoute";
+import {SubscriptionRoute} from "./Api/Routes/SubscriptionRoute";
+import { UserRoute } from "./Api/Routes/UserRoute";
 const app = express();
 
 app.use(
@@ -30,16 +32,16 @@ app.use(compression());
 app.use(cookieParser());
 app.use(bodyParser.json());
 
-console.log({ErrorMiddleware})
-app.use(ErrorMiddleware);
 
-app.use("/", router());
 // routes
 app.use("/quiz", QuizRoute);
+app.use("/authentication", AuthenticationRoute)
+app.use("/user", UserRoute)
+app.use("/subscription", SubscriptionRoute);
 
-
+app.use(ErrorMiddleware);
 // Schedulers
-generateQuizScheduler.addNewQuizzes(); // Handles creating quizzes
+// generateQuizScheduler.addNewQuizzes(); // Handles creating quizzes
 // sendMessageToUsersScheduler.execute();
 
 const server = http.createServer(app);

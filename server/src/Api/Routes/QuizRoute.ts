@@ -1,13 +1,20 @@
 import { applicationFeatureFactory } from "../Factories/ApplicationFeatureFactory";
 import { QuizController } from "../Controllers/QuizController";
 import { Router } from "express";
+import { authenticationMiddleware } from "../../Api/Middlewares/AuthenticationMiddleware";
 
 
-export const quizController = new QuizController(applicationFeatureFactory.QuizFeatures());
 
 const QuizRoute = Router();
 
-QuizRoute.post("/addquizzes", quizController.AddNewQuizzes);
-QuizRoute.get("/currentquiz", quizController.GetCurrentQuiz)
+const quizController = new QuizController(applicationFeatureFactory.QuizFeatures());
+
+QuizRoute.post("/addquizzes", authenticationMiddleware.adminPermissionRequired, quizController.AddNewQuizzes);
+QuizRoute.get("/currentquiz", quizController.GetCurrentQuiz);
 QuizRoute.get("/get", quizController.GetQuizzesByStatus);
-export {QuizRoute};
+QuizRoute.get("/all", quizController.GetAllQuizzes);
+QuizRoute.patch("/editquizquestion", quizController.EditSingleQuizQuestion);
+QuizRoute.patch("/updatetolive/:id", quizController.UpdateQuizStatusToLive);
+QuizRoute.delete("/deletebystatus", quizController.DeleteQuizByStatus);
+
+export {QuizRoute, quizController};

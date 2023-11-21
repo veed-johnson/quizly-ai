@@ -9,19 +9,30 @@ import { IQuizService } from "../../Application/Contracts/Services/QuizServiceMo
 import { QuizService } from "../../Application/Services/QuizServiceModule/QuizService";
 import { infrastructureClientFactory } from "./InfrastructureClientFactory";
 import { IInfrastructureClientFactory } from "../../Application/Contracts/Factories/IInfrastructureClientFactory";
+import { IUserService } from "../../Application/Contracts/Services/AuthenticationServiceModule/IUserService";
+import { UserService } from "../../Application/Services/AuthenticationServiceModule/UserSevice";
+import { HashConfig } from "../../Application/Common/Config/HashConfig";
+import { appSettings } from "../../Api/appSettings";
+import { ISubscriptionService } from "../../Application/Contracts/Services/SubscriberService/ISubscriptionService";
+import { SubscriptionService } from "../../Application/Services/SubscriptionService/SubscriptionService";
 
 
 
 class ApplicationServiceFactory implements IApplicationServiceFactory{
     private readonly _persistenceFactory: IPersistenceFactory;
     private readonly _infrastructureClientFactory: IInfrastructureClientFactory;
-    private _promptService: IPromptService;
-    private _chatService: IChatService;
-    private _quizService: IQuizService;
+    private readonly _hashConfig: HashConfig
 
-    public constructor(persistenceFactory: IPersistenceFactory, infrastructureClientFactory: IInfrastructureClientFactory){
+    private _promptService: IPromptService | undefined;
+    private _chatService: IChatService | undefined;
+    private _quizService: IQuizService | undefined;
+    private _userService: IUserService | undefined;
+    private _subscriptionService: ISubscriptionService | undefined;
+
+    public constructor(persistenceFactory: IPersistenceFactory, infrastructureClientFactory: IInfrastructureClientFactory, hashConfig: HashConfig){
         this._persistenceFactory = persistenceFactory;
         this._infrastructureClientFactory = infrastructureClientFactory;
+        this._hashConfig = hashConfig;
     }
 
     public ChatService = (): IChatService => {
@@ -45,6 +56,26 @@ class ApplicationServiceFactory implements IApplicationServiceFactory{
 
         return this._quizService;
     }
+
+    public UserService = (): IUserService => {
+        if(!this._userService){
+            this._userService = new UserService(this._persistenceFactory.UserRepository(), this._hashConfig)
+        }
+        return this._userService;
+    }
+
+    public SubscriptionService = (): ISubscriptionService => {
+        if(!this._subscriptionService){
+            this._subscriptionService = new SubscriptionService(this._persistenceFactory.SubscriberRepository());
+        }
+        return this._subscriptionService;
+    }
 }
 
-export const applicationServiceFactory = new ApplicationServiceFactory(persistenceFactory, infrastructureClientFactory);
+const HashConfigOptions = {
+    HASH_SECRET: appSettings.HASH_SECRET
+}
+
+const hashConfig = new HashConfig(HashConfigOptions.HASH_SECRET);
+
+export const applicationServiceFactory = new ApplicationServiceFactory(persistenceFactory, infrastructureClientFactory, hashConfig);

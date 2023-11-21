@@ -4,5 +4,5 @@ import { IBaseRepository } from "../Common/IBaseRepository";
 
 
 export interface ISubscriberRepository extends IBaseRepository<Subscriber, ObjectId>{
-    SubscriberExists(phoneNumber: string): Promise<boolean>;
+    SubscriberExists(countryCode: string, phoneNumber: string): Promise<boolean>;
 }

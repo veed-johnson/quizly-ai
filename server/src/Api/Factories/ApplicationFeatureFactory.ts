@@ -13,6 +13,12 @@ import { IGetCurrentQuiz } from "../../Application/Contracts/Features/QuizModule
 import { GetCurrentQuiz } from "../../Application/Features/QuizModule/GetCurrentQuiz";
 import { IQuizFeatures } from "../../Application/Contracts/Features/QuizModule/IQuizFeatures";
 import { QuizFeatures } from "../../Application/Features/QuizModule/QuizFeatures";
+import { IUserFeatures } from "../../Application/Contracts/Features/AuthenticationModule/IUserFeatures";
+import { UserFeatures } from "../../Application/Features/AuthenticationModule/UserFeatures";
+import { IAuthFeatures } from "../../Application/Contracts/Features/AuthenticationModule/IAuthFeatures";
+import { AuthFeatures } from "../../Application/Features/AuthenticationModule/AuthFeatures";
+import { ISubscriptionFeatures } from "../../Application/Contracts/Features/SubscriptionFeature/ISubscriptionFeatures";
+import { SubscriptionFeatures } from "../../Application/Features/SubscriptionFeature/SubscriptionFeatures";
 
 
 class ApplicationFeatureFactory implements IApplicationFeatureFactory{
@@ -21,12 +27,17 @@ class ApplicationFeatureFactory implements IApplicationFeatureFactory{
     private readonly _persistenceFactory: IPersistenceFactory;
     
 
-    private _messageAllSubscribers: IMessageAllSubscribers;
-    private _addNewQuizzes: IAddNewQuizzes;
-    private _getCurrentQuiz: IGetCurrentQuiz;
-    private _quizFeatures: IQuizFeatures;
+    private _messageAllSubscribers: IMessageAllSubscribers | undefined;
+    private _addNewQuizzes: IAddNewQuizzes | undefined;
+    private _getCurrentQuiz: IGetCurrentQuiz | undefined;
+    private _quizFeatures: IQuizFeatures | undefined;
+    private _userFeatures: IUserFeatures | undefined;
+    private _authFeatures: IAuthFeatures | undefined;
+    private _subscriptionFeatures: ISubscriptionFeatures | undefined;
 
-    public constructor(applicationServiceFactory: IApplicationServiceFactory, infrastructureClientFactory : IInfrastructureClientFactory, persistenceFactory: IPersistenceFactory){
+    public constructor(applicationServiceFactory: IApplicationServiceFactory,
+        infrastructureClientFactory : IInfrastructureClientFactory, 
+        persistenceFactory: IPersistenceFactory){
         this._applicationServiceFactory = applicationServiceFactory;
         this._infrastructureClientFactory = infrastructureClientFactory;
         this._persistenceFactory = persistenceFactory;
@@ -59,6 +70,30 @@ class ApplicationFeatureFactory implements IApplicationFeatureFactory{
             this._quizFeatures = new QuizFeatures(this._applicationServiceFactory.QuizService());
         }
         return this._quizFeatures;
+    }
+
+    public UserFeatures = (): IUserFeatures => {
+        if(!this._userFeatures){
+            this._userFeatures = new UserFeatures(this._applicationServiceFactory.UserService());
+        }
+        return this._userFeatures;
+    }
+
+    public AuthFeatures = (): IAuthFeatures => {
+        if(!this._authFeatures){
+            this._authFeatures = new AuthFeatures(this._infrastructureClientFactory.AuthService(), 
+            this._applicationServiceFactory.UserService(), 
+            this._infrastructureClientFactory.MailService())
+        }
+        return this._authFeatures;
+    }
+
+    public SubscriptionFeatures = (): ISubscriptionFeatures => {
+        if(!this._subscriptionFeatures){
+            this._subscriptionFeatures = new SubscriptionFeatures(this._applicationServiceFactory.SubscriptionService(), this._infrastructureClientFactory.MessageService());
+        }
+
+        return this._subscriptionFeatures;
     }
 }
 

@@ -1,6 +1,6 @@
 import { IAddNewQuizzes } from "../../../Application/Contracts/Features/QuizModule/IAddNewQuizzes";
 import { IQuizService } from "../../../Application/Contracts/Services/QuizServiceModule/IQuizService"
-import { DateAndTimeUtilities } from "../../../Application/Utilities/DateAndTimeUtilities";
+import { DateAndTimeUtilities } from "../../Common/Utilities/DateAndTimeUtilities";
 import { Quiz } from "../../../Domain/Entities/QuizModule/Quiz";
 
 

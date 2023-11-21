@@ -11,20 +11,26 @@ import { TwilioMessageService } from "../../Infrastructure/Services/ChatModule/T
 import { NodeMailerConfig } from "../../Infrastructure/Config/NodeMailerConfig";
 import { IMailService } from "../../Application/Contracts/Services/ChatModule/IMailService";
 import { MailService } from "../../Infrastructure/Services/ChatModule/MailService";
+import { IAuthService } from "../../Application/Contracts/Services/AuthenticationServiceModule/IAuthService";
+import { JwtService } from "../../Infrastructure/Services/ChatModule/JwtService";
+import { JwtConfig } from "../../Infrastructure/Config/JwtConfig";
 
  class InfrastructureClientFactory implements IInfrastructureClientFactory{
     private readonly _chatGptConfig: ChatGPTConfig;
     private readonly _twilioConfig: TwilioConfig;
     private readonly _nodeMailerConfig: NodeMailerConfig;
-
+    private readonly _jwtConfig: JwtConfig;
     private _chatClient:  IChatClient;
     private _scheduler: IScheduler;
     private _messageService: IMessageService;
     private _mailService: IMailService;
-    public constructor(chatGPTConfig: ChatGPTConfig, twilioConfig: TwilioConfig, nodeMailerConfig: NodeMailerConfig){
+    private _authService: IAuthService;
+
+    public constructor(chatGPTConfig: ChatGPTConfig, twilioConfig: TwilioConfig, nodeMailerConfig: NodeMailerConfig, jwtConfig: JwtConfig){
         this._chatGptConfig = chatGPTConfig;
         this._twilioConfig = twilioConfig;
         this._nodeMailerConfig = nodeMailerConfig;
+        this._jwtConfig = jwtConfig;
     }
 
     public ChatClient =  (): IChatClient => {
@@ -53,6 +59,14 @@ import { MailService } from "../../Infrastructure/Services/ChatModule/MailServic
             this._mailService = new MailService(this._nodeMailerConfig);
         }
         return this._mailService;
+    }
+
+    public AuthService = (): IAuthService => {
+        if(!this._authService){
+            this._authService = new JwtService(this._jwtConfig);
+        }
+
+        return this._authService;
     }
 }
 
@@ -83,6 +97,12 @@ const nodeMailerConfig = new NodeMailerConfig(nodeMailerConfigOptions.MAIL_ADDRE
     nodeMailerConfigOptions.MAIL_HOST,
     nodeMailerConfigOptions.MAIL_PORT);
 
-export const infrastructureClientFactory = new InfrastructureClientFactory(chatGPTConfig, twilioConfig, nodeMailerConfig);
+const jwtConfigOptions = {
+    JWT_KEY: appSettings.JWT_KEY
+}
+
+const jwtConfig = new JwtConfig(jwtConfigOptions.JWT_KEY);
+
+export const infrastructureClientFactory = new InfrastructureClientFactory(chatGPTConfig, twilioConfig, nodeMailerConfig, jwtConfig);
 
 

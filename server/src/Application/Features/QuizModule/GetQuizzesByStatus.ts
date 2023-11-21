@@ -1,7 +1,7 @@
 import { PaginationResponse } from "../../../Application/DTO/Models/PaginationResponse";
 import { IQuizService } from "../../../Application/Contracts/Services/QuizServiceModule/IQuizService"
 import { Quiz } from "../../../Domain/Entities/QuizModule/Quiz";
-import { DateAndTimeUtilities } from "../../../Application/Utilities/DateAndTimeUtilities";
+import { DateAndTimeUtilities } from "../../Common/Utilities/DateAndTimeUtilities";
 import { IGetQuizzesByStatus } from "../../../Application/Contracts/Features/QuizModule/IGetQuizzesByStatus";
 
 export class GetQuizzesByStatus implements IGetQuizzesByStatus{
