@@ -205,8 +205,13 @@ export class QuizService implements IQuizService{
         quiz.questionsList.forEach(questionList => {
             questionList.questions.forEach(question => {
                 delete question._id; // we want the database to create the id by itself
+                
             })
         })
+        
+        console.log("questionList------------------------------")
+        console.log(JSON.stringify(quiz.questionsList));
+        console.log("questionList------------------------------")
         quizEntity.categories = quiz.categories ?? [];
         quizEntity.questionsList = quiz.questionsList ?? [];
         quizEntity.date = date;

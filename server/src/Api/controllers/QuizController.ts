@@ -39,10 +39,7 @@ export class QuizController {
 
     public GetQuizzesByStatus = async (request: Request<{}, {}, {}, GetQuizByStatusQueryParams>, response: Response, next: NextFunction) => {
         try{
-            const page = Number(request.query.page) ?? 0;
-            const pageSize = Number(request.query.pageSize) ?? 0;
-            const status = request.query.status ?? "";
-
+            const {page, pageSize, status} = new GetQuizByStatusQueryParams(request.query.page, request.query.pageSize, request.query.status)
             const quizResponse = await this._quizFeatures.GetQuizzesByStatus(status, page, pageSize);
 
             return response.status(200).json(quizResponse);

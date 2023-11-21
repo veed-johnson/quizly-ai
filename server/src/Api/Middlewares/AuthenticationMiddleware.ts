@@ -4,7 +4,11 @@ import { IAuthFeatures } from "../../Application/Contracts/Features/Authenticati
 import { appSettings } from "../../Api/appSettings";
 import { applicationFeatureFactory } from "../Factories/ApplicationFeatureFactory";
 
-const siteConfig = new SiteConfig(appSettings.AUTH_COOKIE, appSettings.SITE_BASE_URL, appSettings.SITE_BASE_PATH);
+const siteConfig = new SiteConfig(appSettings.AUTH_COOKIE, 
+    appSettings.SITE_BASE_URL, 
+    appSettings.SITE_BASE_PATH, 
+    appSettings.FRONT_END_BASEURL, 
+    appSettings.FRONT_END_RESET_PASSWORD_URL);
 
 
 /**

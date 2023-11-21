@@ -30,7 +30,7 @@ export class GenerateQuizScheduler{
         
         try{
             const categories: string = "sports, music, history, geography, movies, and science"
-            const totalQuizItemsToAdd = 1;
+            const totalQuizItemsToAdd = 7;
             console.log(`##### adding quizzes of size`)
             await this._quizFeatures.AddNewQuizzes(totalQuizItemsToAdd, categories);
             console.log("##### end of adding quizzes")
@@ -38,13 +38,14 @@ export class GenerateQuizScheduler{
             
         }
         catch(ex){
-            const exceptionMessage = `An exception occurred while adding quiz: Exception ${JSON.stringify(ex)}`;
+            console.log({ex})
+            const exceptionMessage = `An exception occurred while adding quiz: Exception | ${ex?.message ?? "Unknown error."}`;
             await this.mailAdminUsers("Failed to added new quizzes", exceptionMessage);
         }
     }
 
     addNewQuizzes = () => {
-        this._iScheduler.Execute("addNewQuizzes", '*/1 * * * *', this.addQuizzes, (ex) => console.log(ex));
+        this._iScheduler.Execute("addNewQuizzes", '*/6 * * * *', this.addQuizzes, (ex) => console.log(ex));
     }
 }
 

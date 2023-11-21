@@ -64,7 +64,7 @@ export class AuthenticationController {
     public GenerateAndSendResetPasswordToken = async (request: Request<{}, {}, ResetPasswordTokenRequest>, response: Response, next: NextFunction) => {
         try{
             const resetPasswordTokenRequest: ResetPasswordTokenRequest = request.body;
-            resetPasswordTokenRequest.resetPasswordUrl = this.GetBaseUrl(request);
+            resetPasswordTokenRequest.resetPasswordUrl = this.GetResetPasswordBaseUrl();
             await this._authFeatures.GenerateAndSendResetPasswordToken(request.body);
 
             return response.sendStatus(200);
@@ -84,12 +84,8 @@ export class AuthenticationController {
         }
     }
 
-    private GetBaseUrl = (req: Request): string => {
-        const protocol = req.protocol; 
-        const host = req.hostname; 
-        const port = process.env.PORT; 
-  
-        const baseUrl = `${protocol}://${host}:${port}` 
+    private GetResetPasswordBaseUrl = (): string => {
+        const baseUrl = this._siteConfig.FRONT_END_BASEURL + this._siteConfig.FRONT_END_RESET_PASSWORD_URL
         return baseUrl;
     }
 }

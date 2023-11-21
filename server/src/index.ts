@@ -10,7 +10,6 @@ import mongoose from "mongoose";
 import { ErrorMiddleware } from "./Api/Middlewares/ErrorMiddleware";
 import { QuizRoute } from "./Api/Routes/QuizRoute";
 import { generateQuizScheduler } from "./Api/Schedulers/AddQuizScheduler";
-import { sendMessageToUsersScheduler } from "./Api/Schedulers/SendMessageToUsersScheduler";
 import { AuthenticationRoute } from "./Api/Routes/AuthenticationRoute";
 import {SubscriptionRoute} from "./Api/Routes/SubscriptionRoute";
 import { UserRoute } from "./Api/Routes/UserRoute";

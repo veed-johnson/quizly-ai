@@ -4,7 +4,11 @@ import { AuthenticationController } from "../../Api/Controllers/AuthenticationCo
 import { applicationFeatureFactory } from "../Factories/ApplicationFeatureFactory";
 import { Router } from "express";
 
-const siteConfig = new SiteConfig(appSettings.AUTH_COOKIE, appSettings.SITE_BASE_URL, appSettings.SITE_BASE_PATH);
+const siteConfig = new SiteConfig(appSettings.AUTH_COOKIE, 
+    appSettings.SITE_BASE_URL, 
+    appSettings.SITE_BASE_PATH, 
+    appSettings.FRONT_END_BASEURL, 
+    appSettings.FRONT_END_RESET_PASSWORD_URL)
 
 export const authenticationController = new AuthenticationController(applicationFeatureFactory.UserFeatures(), applicationFeatureFactory.AuthFeatures(), siteConfig);
 
