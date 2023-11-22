@@ -27,7 +27,7 @@ export class QuizService implements IQuizService{
 
     public GetCurrentQuiz = async (): Promise<Quiz | null> => {
         // get today's date
-        const todaysStartDate = DateAndTimeUtilities.GetCurrentDate();
+        const todaysStartDate = DateAndTimeUtilities.GetCurrentSydneyDayStartTime();
         const tomorrowsStartDate = DateAndTimeUtilities.AddDays(todaysStartDate, 1);
 
         let query ={
@@ -64,7 +64,7 @@ export class QuizService implements IQuizService{
     }
 
     public GetPastQuizzes = async (page: number, pageSize: number, date?: Date): Promise<PaginationResponse<Quiz>> => {
-        const startDate = date ?? DateAndTimeUtilities.GetCurrentDate();
+        const startDate = date ?? DateAndTimeUtilities.GetCurrentSydneyDayStartTime();
         const pastQuizzesQuery = this.GetPastQuizQuery(startDate);
         const sort = {date: 1};
         return await this._quizRepository.ToPagedAsync(pastQuizzesQuery, page, pageSize, sort);
@@ -72,7 +72,7 @@ export class QuizService implements IQuizService{
 
     public GetCurrentQuizzes = async (page: number, pageSize: number, date?: Date ): Promise<PaginationResponse<Quiz>> => {
         // get today's date
-        const startDate = date ?? DateAndTimeUtilities.GetCurrentDate();
+        const startDate = date ?? DateAndTimeUtilities.GetCurrentSydneyDayStartTime();
 
         let query =this.GetCurrentQuizQuery(startDate);
         const sort = {date: 1};
@@ -89,7 +89,8 @@ export class QuizService implements IQuizService{
     }
 
     public GetUpcomingQuizzes = async (page: number, pageSize: number, date?: Date): Promise<PaginationResponse<Quiz>> => {
-        const startDate = date ?? DateAndTimeUtilities.GetCurrentDate();
+        const startDate = date ?? DateAndTimeUtilities.GetCurrentSydneyDayStartTime();
+        console.log({currentSydneyStartTimeInUTC: startDate})
         const pastQuizzesQuery = this.GetUpcomingQuizQuery(startDate);
         const sort = {date: 1};
         return await this._quizRepository.ToPagedAsync(pastQuizzesQuery, page, pageSize, sort);
@@ -100,7 +101,7 @@ export class QuizService implements IQuizService{
             throw new QuizNotFoundException(`quiz with not found`);
         }
         quiz.recordStatus = RecordStatus.active;
-        quiz.date = DateAndTimeUtilities.GetCurrentDate();
+        quiz.date = DateAndTimeUtilities.GetCurrentSydneyDayStartTime();
         return await this._quizRepository.UpdateAsync(quiz)
         
     }
@@ -145,6 +146,7 @@ export class QuizService implements IQuizService{
         for(const quiz of quizQuestions){
             const quizEntity = this.TransformPartialQuizToEntity(quiz, currentDate);
             currentDate = DateAndTimeUtilities.AddDays(currentDate, 1);
+            console.log({quizDateToBeSaved: currentDate})
             quizList.push(quizEntity);
         }
 
@@ -160,11 +162,12 @@ export class QuizService implements IQuizService{
     public GetLatestScheduledQuizDate = async (): Promise<Date> => {
         const latestScheduledQuiz = await this._quizRepository.getLatestScheduledQuiz();
         if(latestScheduledQuiz){
-            return latestScheduledQuiz.date;
+            const latestScheduledQuizDate = latestScheduledQuiz.date;
+            return latestScheduledQuizDate;
         }
         // get current time and remove one day from it (Not sure this is the best idea)
         const PREVIOUS_DAY_POSITION = -1;
-        var curentDate = DateAndTimeUtilities.GetCurrentTime();
+        var curentDate = DateAndTimeUtilities.GetCurrentSydneyDayStartTime();
         return DateAndTimeUtilities.AddDays(curentDate, PREVIOUS_DAY_POSITION);
     }
 
@@ -185,7 +188,7 @@ export class QuizService implements IQuizService{
     }
 
     public UpdateAllCurrentQuizToArchived = async (): Promise<number> => {
-        const startDate = DateAndTimeUtilities.GetCurrentDate();
+        const startDate = DateAndTimeUtilities.GetCurrentSydneyDayStartTime();
         const nextDayDate = DateAndTimeUtilities.AddDays(startDate, 1);
 
         let query ={
@@ -204,6 +207,7 @@ export class QuizService implements IQuizService{
         const quizEntity = new Quiz();
 
         quiz.questionsList.forEach(questionList => {
+            delete questionList._id;
             questionList.questions.forEach(question => {
                 delete question._id; // we want the database to create the id by itself
                 
@@ -221,6 +225,7 @@ export class QuizService implements IQuizService{
 
     public AddQuizStatusToQuizBasedOnReferenceDate = (quiz: Quiz, referenceDate: Date): Quiz => {
         quiz.status = this.GetQuizStatusBasedOnReferenceDate(quiz.date, referenceDate);
+        quiz.date = DateAndTimeUtilities.ConvertUtcTimeToSydneyTime(quiz.date);
         return quiz;
     }
     
@@ -271,10 +276,10 @@ export class QuizService implements IQuizService{
 
     private GetCurrentQuizQuery = (startDate: Date): { [key in keyof Partial<Quiz>]: any} => {
         const nextDayDate = DateAndTimeUtilities.AddDays(startDate, 1);
-
+        const startTimeForStartDate = DateAndTimeUtilities.GetDayStartSydneyTime(startDate);
         return {
             date: {
-              $gte: startDate, // Greater than or equal to the start of the day
+              $gte: startTimeForStartDate, // Greater than or equal to the start of the day
               $lt: nextDayDate, // Less than the start of the next day
             },
             recordStatus: RecordStatus.active
@@ -282,9 +287,11 @@ export class QuizService implements IQuizService{
     }
 
     private GetUpcomingQuizQuery = (startDate: Date): {[key in keyof Partial<Quiz>]: any} => {
+        const endOfStartDate = DateAndTimeUtilities.GetDayEndSydneyTime(startDate);
+        console.log({endOfStartDate});
         return {
             date: {
-                $gt: startDate
+                $gt: endOfStartDate
             },
             recordStatus: RecordStatus.active
         };

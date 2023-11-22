@@ -24,14 +24,16 @@ export class QuizFeatures implements IQuizFeatures {
         let totalQuizItemsLeftToAdd = quiz_size;
         while(totalQuizItemsLeftToAdd > 0){
             const batchSizeOfQuizToAdd = this.calculateBatchSize(totalQuizItemsLeftToAdd);
-            console.log({totalQuizItemsLeftToAdd, batchSizeOfQuizToAdd});
 
-            const DELAY = 60 * 1000; // tim
+            // Delay to prevent too many requests
+            const DELAY = 60 * 1000; 
+            await DateAndTimeUtilities.Delay(DELAY);
+
             if(batchSizeOfQuizToAdd > 0){
-                setTimeout(async () => {
-                    const createdQuizzes = await this.addNewQuizzes(batchSizeOfQuizToAdd, categories);
-                    quizzesAdded.push(...createdQuizzes);
-                }, DELAY)
+                
+                const createdQuizzes = await this.addNewQuizzes(batchSizeOfQuizToAdd, categories);
+                quizzesAdded.push(...createdQuizzes);
+                
             }
             totalQuizItemsLeftToAdd -= batchSizeOfQuizToAdd;
         }
@@ -39,9 +41,10 @@ export class QuizFeatures implements IQuizFeatures {
         return quizzesAdded;
         
     }
+    
     GetQuizzesByStatus = async (status: string, page: number, pageSize: number): Promise<PaginationResponse<Quiz>> => {
         const quizzes: PaginationResponse<Quiz> = await this._quizService.GetQuizzesByStatus(status, page, pageSize);
-        const referenceDateStatusIsBasedOn = DateAndTimeUtilities.GetCurrentDate();
+        const referenceDateStatusIsBasedOn = DateAndTimeUtilities.GetCurrentSydneyDayStartTime();
         quizzes.items = quizzes.items.map(quiz => {
             return this._quizService.AddQuizStatusToQuizBasedOnReferenceDate(quiz, referenceDateStatusIsBasedOn)
         })
@@ -52,7 +55,7 @@ export class QuizFeatures implements IQuizFeatures {
         }
     
     GetAllQuizzes = async (page: number, pageSize: number, sort: {[key in keyof Partial<Quiz>]: number} = {date: 1}) : Promise<PaginationResponse<Quiz>> => {
-        const referenceDateStatusIsBasedOn = DateAndTimeUtilities.GetCurrentDate();
+        const referenceDateStatusIsBasedOn = DateAndTimeUtilities.GetCurrentSydneyDayStartTime();
         const quizzes: PaginationResponse<Quiz> = await this._quizService.GetAllQuizzes(page, pageSize, sort);
         quizzes.items = quizzes.items.map(quiz => {
             return this._quizService.AddQuizStatusToQuizBasedOnReferenceDate(quiz, referenceDateStatusIsBasedOn)
@@ -160,7 +163,7 @@ export class QuizFeatures implements IQuizFeatures {
             const currentQuizResponseForCategory = new GetCurrentQuizResponse()
             currentQuizResponseForCategory.category = question.category;
             currentQuizResponseForCategory.questions = question.questions.map(question => new QuestionResponse(question.question, question.clue));
-
+            currentQuizResponseForCategory.date = DateAndTimeUtilities.ConvertUtcTimeToSydneyTime(quiz.date);
             currentQuizQuestionsResponse.push(currentQuizResponseForCategory);
         }
         

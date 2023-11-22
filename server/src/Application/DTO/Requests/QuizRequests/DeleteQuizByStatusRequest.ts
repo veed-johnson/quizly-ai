@@ -7,6 +7,6 @@ export class DeleteQuizByStatusRequest {
     public constructor(status: string, softDelete?: boolean, referenceDate?: Date){
         this.status = status;
         this.softDelete = softDelete ? softDelete : true; // soft delete means we would reset their status to archived or deleted
-        this.referenceDate = referenceDate ? referenceDate : DateAndTimeUtilities.GetCurrentDate();
+        this.referenceDate = referenceDate ? referenceDate : DateAndTimeUtilities.GetCurrentSydneyDayStartTime();
     }
 }

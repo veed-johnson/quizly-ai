@@ -45,7 +45,7 @@ export class GenerateQuizScheduler{
     }
 
     addNewQuizzes = () => {
-        this._iScheduler.Execute("addNewQuizzes", '*/10 * * * *', this.addQuizzes, (ex) => console.log(ex));
+        this._iScheduler.Execute("addNewQuizzes", '*/3 * * * *', this.addQuizzes, (ex) => console.log(ex));
     }
 }
 

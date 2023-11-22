@@ -1,5 +1,5 @@
 
 export interface IScheduler {
 
-    Execute( name: string, schedule: string, task: () => void, errorCallBack: (ex: Error) => void): void;
+    Execute( name: string, schedule: string, task: () => void, errorCallBack: (ex: Error) => void, timeZone?: string): void;
 }
